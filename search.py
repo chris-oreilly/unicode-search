@@ -9,9 +9,12 @@ def parse(line):
     parts = [s.strip() for s in line.split(';', maxsplit=1)]
     return Entry(*parts)
 
-def match(query, entry):
-    for term in query:
+def match(entry, include, exclude=[]):
+    for term in include:
         if term.upper() not in entry.name:
+            return False
+    for term in exclude:
+        if term.upper() in entry.name:
             return False
     return True
 
@@ -24,15 +27,23 @@ def output(entry):
 
 if __name__ == '__main__':
     if len(sys.argv) == 1:
-        print('usage: {} <search>'.format(sys.argv[0]))
+        print('usage: {} [+]include... -exclude...'.format(sys.argv[0]))
         sys.exit(1)
 
-    query = sys.argv[1:]
+    include = []
+    exclude = []
+    for arg in sys.argv[1:]:
+        if arg[0] == '-':
+            exclude.append(arg[1:])
+        elif arg[0] == '+':
+            include.append(arg[1:])
+        else:
+            include.append(arg)
 
     with open('DerivedName.txt') as f:
         for line in f:
             if not line.strip() or line[0] == '#':
                 continue
             entry = parse(line)
-            if match(query, entry):
+            if match(entry, include, exclude):
                 output(entry)
