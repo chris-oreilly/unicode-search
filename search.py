@@ -1,22 +1,26 @@
 #!/usr/bin/env python3
 
+from collections import namedtuple
 import sys
 
-def parse(line):
-    return [s.strip() for s in line.split(';', maxsplit=1)]
+Entry = namedtuple('Entry', ['code', 'name'])
 
-def match(query, name):
+def parse(line):
+    parts = [s.strip() for s in line.split(';', maxsplit=1)]
+    return Entry(*parts)
+
+def match(query, entry):
     for term in query:
-        if term.upper() not in name:
+        if term.upper() not in entry.name:
             return False
     return True
 
-def output(code_point, name):
+def output(entry):
     try:
-        c = chr(int(code_point, 16))
+        c = chr(int(entry.code, 16))
     except ValueError:
         c = ''
-    print(c, code_point, name, sep='\t')
+    print(c, entry.code, entry.name, sep='\t')
 
 if __name__ == '__main__':
     if len(sys.argv) == 1:
@@ -26,9 +30,9 @@ if __name__ == '__main__':
     query = sys.argv[1:]
 
     with open('DerivedName.txt') as f:
-        for line in (l.strip() for l in f):
-            if not line or line[0] == '#':
+        for line in f:
+            if not line.strip() or line[0] == '#':
                 continue
-            code_point, name = parse(line)
-            if match(query, name):
-                output(code_point, name)
+            entry = parse(line)
+            if match(query, entry):
+                output(entry)
