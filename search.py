@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from collections import namedtuple
+import os.path
 import sys
 
 Entry = namedtuple('Entry', ['code', 'name'])
@@ -40,7 +41,9 @@ if __name__ == '__main__':
         else:
             include.append(arg)
 
-    with open('DerivedName.txt') as f:
+    script_path = os.path.realpath(__file__)
+    path = os.path.join(os.path.dirname(script_path), 'DerivedName.txt')
+    with open(path) as f:
         for line in f:
             if not line.strip() or line[0] == '#':
                 continue
